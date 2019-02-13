@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <link rel="stylesheet" href="main.css">
+
+
+  </head>
+<body>
+    <div class="topnav">
+        <a href="index.html">Home</a>
+        <a href="Bingomap.html">Bingo maps</a>
+        <a href="Bingodata.html">Bingo data</a>
+    </div>
+<script>
+    $(document).ready(function () {
+        var elements = $('#elements')
+
+        element = '';
+        
+        $.ajax({
+            type: 'GET',
+            url: 'http://127.0.0.1:8000/shop/',
+            dataType: 'application/json',
+            success: function(shops) {
+                shops = JSON.parse(shops)
+                $.each(shops, function (i, element){
+                    elements.append(`<li>${element.name + " - " +  element.address + " - " +  element.distance + " - " + element. longitude + " - " +  element.latitude}</li>`);
+                    console.log(element)
+                
+                })
+            }
+        });
+    });
+
+
+
+    
+</script>
+<h1 id="head">Data of Bingo Supermarkets in radius of 5km from Virgin Pulse Company </h1>
+<li id="elements">Name - Address - Distance - Longitude - Latitude</li>
+
+</body>
+</html>

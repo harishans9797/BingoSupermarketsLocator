@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <link rel="stylesheet" href="main.css">
+      <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA8XaJKZmqULy2iDsg0OTJ9JHlBt0Gmglo">
+       </script>
+
+      <script src="http://code.jquery.com/jquery-latest.js"></script>
+
+
+        
+       
+       
+
+        <script>
+                             
+            var map;
+            var infowindow;
+
+            const virginLocation = {
+                lat: () => 44.5398442,
+                lng: () => 18.6690997,
+            }
+            
+            function initialize() {
+                var center = new google.maps.LatLng(virginLocation.lat(), virginLocation.lng());
+                map = new google.maps.Map(document.getElementById('map'),{
+                    center: center,
+                    zoom:15
+                });
+
+                var request = {
+                    location : center,
+                    radius: 5000,
+                    name:['Bingo']
+                };
+
+                infowindow = new google.maps.InfoWindow();
+
+                var service = new google.maps.places.PlacesService(map);
+                service.nearbySearch(request, callback);
+            }
+                
+
+
+
+
+
+            function callback(results, status) {
+                if(status == google.maps.places.PlacesServiceStatus.OK){
+                    let mapped = results.map(item => {
+                        createMarker(item);
+                        return {
+                            name: item.name,
+                            address: item.vicinity,
+                            distance: getDistance(virginLocation, item.geometry.location),
+                            latitude: item.geometry.location.lat(),
+                            longitude: item.geometry.location.lng()
+                        } 
+                            
+                        
+                    });
+
+
+                    for(j=0; j<mapped.length; j++){
+
+                    $.ajax ({
+                        type: "POST",
+                       
+                        url: 'http://127.0.0.1:8000/shop/',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: JSON.stringify
+                        (
+                                mapped[j]
+                            ),
+                        success: function () {
+                            console.log("Success!"); 
+                        },
+                        error: console.log
+                    })
+                    console.log(mapped);
+                }}
+            }
+            
+            function rad (x) {
+                return x * Math.PI / 180;
+            };
+
+            function getDistance (p1, p2) {
+                var R = 6378137; // Earth’s mean radius in meter
+                var dLat = rad(p2.lat() - p1.lat());
+                var dLong = rad(p2.lng() - p1.lng());
+                var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(rad(p1.lat())) * Math.cos(rad(p2.lat())) *
+                    Math.sin(dLong / 2) * Math.sin(dLong / 2);
+                var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                var d = R * c;
+                return d; // returns the distance in meter
+            };
+
+
+            function createMarker(place) {
+                var placeLoc = place.geometry.location;
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location
+                });
+
+                google.maps.event.addDomListener(marker, 'click', function(){
+
+                    infowindow.setContent(place.name, place.LatLng);
+                    infowindow.open(map,this);
+                });
+            }
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
+
+
+
+       <style>
+           html, body, #map {
+               height:100%;
+               margin:0px;
+               padding: 0px;
+           }
+       </style>
+  </head>
+
+<body >
+
+        <div class="topnav">
+                <a href="index.html">Home</a>
+                <a href="Bingomap.html">Bingo maps</a>
+                <a href="Bingodata.html">Bingo data</a>
+              </div>
+
+    <div id="map"></div>
+</body>
+
+</html>
